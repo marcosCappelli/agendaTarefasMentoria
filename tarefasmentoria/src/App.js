@@ -55,6 +55,30 @@ function App() {
     setTime("");
   };
 
+  const handleDelete = async (id) => {
+    await fetch(API + "/todos/" + id, {
+      method: "DELETE",
+    });
+
+    setTodos((prevState) => prevState.filter((todo) => todo.id !== id));
+  };
+
+  const handleEdit = async(todo) => {
+    todo.done = !todo.done;
+
+    const data = await fetch(API + "/todos/" + todo.id, {
+      method: "PUT",
+      body: JSON.stringify(todo),
+      headers: {
+        "Content-Type": "application/json",
+    },
+    });
+
+    setTodos((prevState) => 
+      prevState.map((t) => (t.id === data.id ? (t = data) : t))
+    );
+  };
+
   if (loading) {
     return <p>Loading......</p>;
   }
@@ -69,7 +93,7 @@ function App() {
           <h2>Insira sua próxima tarefa:</h2>
           <form onSubmit={handleSubmit}>
             <div className='form-control'>
-              <label htmlFor='title'>O que você vai fazer?</label>
+              <label htmlFor='title'>Tarefa do dia?</label>
               <input type="text"
                name='title' 
               placeholder='Titulo da tarefa'
@@ -100,10 +124,10 @@ function App() {
               <h3 className={todo.done ? 'todo-done' : ""}>{todo.title}</h3>
               <p>Duração: {todo.time}</p>
               <div className='actions'>
-                <span>
+                <span onClick={() => handleEdit(todo)}>
                   {!todo.done ? <BsBookmarkCheck /> : <BsBookmarkCheckFill />}
                 </span>
-                <BsTrash/>
+                <BsTrash onClick={() => handleDelete(todo.id)}/>
               </div>
             </div>
           ))}
